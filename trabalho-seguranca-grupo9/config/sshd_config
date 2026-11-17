@@ -1,0 +1,51 @@
+# =============================================================================
+# sshd_config - SSH endurecido | Grupo 9 - Energia e Smart Grid
+# O texto __ADMIN_USER__ é substituído pelo hardening.sh.
+# Obs.: a linha "Include /etc/ssh/sshd_config.d/*.conf" foi removida de
+# propósito: no SSH vale a PRIMEIRA ocorrência de cada diretiva, e arquivos
+# do cloud-init poderiam reativar PasswordAuthentication.
+# =============================================================================
+
+# --- Rede -------------------------------------------------------------------
+Port 2222                       # Porta fora do padrão (reduz varreduras automáticas)
+AddressFamily inet              # Apenas IPv4
+#ListenAddress 192.168.10.1     # (Opcional) escutar só na interface LAN
+
+# --- Autenticação -----------------------------------------------------------
+PermitRootLogin no              # Bloqueia login direto do root
+AllowUsers __ADMIN_USER__       # Somente estes usuários podem entrar via SSH
+PubkeyAuthentication yes        # Habilita chave pública/privada
+PasswordAuthentication no       # Desabilita senha (só chave)
+KbdInteractiveAuthentication no # Desabilita autenticação interativa por teclado
+PermitEmptyPasswords no         # Nunca aceita senha vazia
+AuthenticationMethods publickey # Exige explicitamente chave pública
+HostbasedAuthentication no
+IgnoreRhosts yes
+StrictModes yes                 # Recusa chaves com permissões inseguras
+UsePAM yes
+
+# --- Limites (mitigam força bruta e abuso) ----------------------------------
+MaxAuthTries 3                  # Máx. 3 tentativas por conexão
+MaxSessions 3
+LoginGraceTime 30               # 30s para autenticar, senão desconecta
+ClientAliveInterval 300         # Verifica cliente a cada 5 min...
+ClientAliveCountMax 2           # ...e derruba sessão ociosa após 2 falhas (~10 min)
+
+# --- Recursos desnecessários desativados ------------------------------------
+X11Forwarding no
+AllowTcpForwarding no
+AllowAgentForwarding no
+PermitTunnel no
+PermitUserEnvironment no
+
+# --- Auditoria --------------------------------------------------------------
+LogLevel VERBOSE                # Registra a impressão digital da chave usada no login
+Banner /etc/issue.net           # Aviso legal antes do login
+
+# --- Criptografia moderna ---------------------------------------------------
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+
+# --- SFTP -------------------------------------------------------------------
+Subsystem sftp /usr/lib/openssh/sftp-server

@@ -1,0 +1,5 @@
+# Nunca versionar chaves privadas
+*.key
+secring*
+private-keys-v1.d/
+*.pem

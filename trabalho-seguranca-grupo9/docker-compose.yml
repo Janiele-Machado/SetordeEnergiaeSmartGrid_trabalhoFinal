@@ -1,0 +1,104 @@
+# =============================================================================
+# docker-compose.yml - Laboratório de Segurança da Informação | Grupo 9
+#
+#   [atacante] 172.31.200.60 --(wan)-- 172.31.200.10 [servidor] 192.168.10.1 --(lan)-- 192.168.10.10 [cliente]
+#
+# - wan : rede externa (com saída para a internet via host)
+# - lan : rede interna ISOLADA (internal: true) -> só chega nela passando pelo servidor
+# - O "servidor" é o Ubuntu com firewall/gateway; "cliente" é o admin; "atacante" roda Nmap/hping3.
+# =============================================================================
+name: seg-grupo9
+
+services:
+
+  servidor:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.servidor
+    container_name: servidor
+    hostname: servidor-energia
+    init: true                       # PID 1 correto (encerra processos filhos ao parar)
+    cap_add:
+      - NET_ADMIN                    # necessário para iptables e rotas DENTRO do container
+    sysctls:                         # parâmetros de rede (namespaced) = hardening de kernel de rede
+      net.ipv4.ip_forward: "1"                    # o servidor roteia LAN <-> WAN
+      net.ipv4.conf.all.rp_filter: "1"            # anti-spoofing
+      net.ipv4.conf.default.rp_filter: "1"
+      net.ipv4.conf.all.accept_redirects: "0"
+      net.ipv4.conf.default.accept_redirects: "0"
+      net.ipv4.conf.all.send_redirects: "0"
+      net.ipv4.conf.all.accept_source_route: "0"
+      net.ipv4.conf.all.log_martians: "1"
+    environment:
+      INTEGRITY_INTERVAL: "60"       # segundos entre verificações automáticas de integridade
+    volumes:
+      - ./scripts:/opt/projeto/scripts:ro
+      - ./config:/opt/projeto/config:ro
+      - ./evidencias:/evidencias
+      - chaves:/chaves:ro            # chave PÚBLICA do admin (publicada pelo cliente)
+      - iptables_data:/etc/iptables  # regras salvas sobrevivem a restart
+      - integrity_data:/var/lib/integrity
+    networks:
+      wan:
+        ipv4_address: 172.31.200.10  # IP estático WAN
+      lan:
+        ipv4_address: 192.168.10.1   # IP estático LAN
+
+  cliente:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ferramentas
+    container_name: cliente
+    hostname: cliente-admin
+    init: true
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GATEWAY: "192.168.10.1"        # o cliente usa o servidor como gateway
+      GERAR_CHAVE: "1"               # gera o par de chaves SSH do administrador
+    volumes:
+      - ./evidencias:/evidencias
+      - ./gpg:/gpg
+      - cliente_ssh:/root/.ssh       # chave PRIVADA fica só aqui
+      - chaves:/chaves               # publica a chave pública para o servidor
+    depends_on:
+      - servidor
+    networks:
+      lan:
+        ipv4_address: 192.168.10.10
+
+  atacante:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ferramentas
+    container_name: atacante
+    hostname: atacante
+    init: true
+    volumes:
+      - ./evidencias:/evidencias
+    depends_on:
+      - servidor
+    networks:
+      wan:
+        ipv4_address: 172.31.200.60
+
+networks:
+  wan:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.200.0/24
+          gateway: 172.31.200.1
+  lan:
+    driver: bridge
+    internal: true                   # sem saída direta: tudo passa pelo servidor
+    ipam:
+      config:
+        - subnet: 192.168.10.0/24
+          gateway: 192.168.10.254    # libera o .1 para o servidor
+
+volumes:
+  chaves:
+  cliente_ssh:
+  iptables_data:
+  integrity_data:

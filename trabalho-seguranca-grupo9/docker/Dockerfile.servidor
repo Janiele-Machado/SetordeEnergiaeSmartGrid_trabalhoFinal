@@ -1,0 +1,27 @@
+# Servidor Ubuntu (gateway + firewall + serviços simulados do Smart Grid)
+FROM ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        openssh-server openssh-client iptables iproute2 iputils-ping procps \
+        python3 gnupg pinentry-curses sudo less nano ca-certificates \
+        netcat-openbsd bsdutils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Usuários do laboratório (senhas fracas DE PROPÓSITO: mostram o "antes" do hardening)
+RUN useradd -m -s /bin/bash admin_grid \
+ && echo "admin_grid:admin123" | chpasswd \
+ && echo "root:root123" | chpasswd \
+ && usermod -aG sudo admin_grid
+
+# Estado inicial INSEGURO do SSH (o hardening.sh corrige tudo isso)
+RUN printf '\n# --- ESTADO INICIAL INSEGURO (laboratorio) ---\nPort 22\nPermitRootLogin yes\nPasswordAuthentication yes\n' >> /etc/ssh/sshd_config
+
+# Em container não há auditd: sem isso o login via SSH falha por causa do PAM
+RUN sed -i 's@^session\s\+required\s\+pam_loginuid.so@session optional pam_loginuid.so@' /etc/pam.d/sshd
+
+COPY docker/servidor-entrypoint.sh /usr/local/bin/servidor-entrypoint.sh
+COPY docker/servicos_simulados.py  /usr/local/bin/servicos_simulados.py
+RUN chmod +x /usr/local/bin/servidor-entrypoint.sh /usr/local/bin/servicos_simulados.py
+
+ENTRYPOINT ["/usr/local/bin/servidor-entrypoint.sh"]

@@ -1,1 +1,0 @@
-# SetordeEnergiaeSmartGrid_trabalhoFinal

@@ -1,0 +1,14 @@
+# Imagem usada pelo "cliente" (admin) e pelo "atacante" (Nmap, hping3)
+FROM ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        openssh-client iproute2 iputils-ping nmap hping3 netcat-openbsd \
+        gnupg pinentry-curses curl dnsutils less nano procps ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY docker/ferramentas-entrypoint.sh /usr/local/bin/ferramentas-entrypoint.sh
+RUN chmod +x /usr/local/bin/ferramentas-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/ferramentas-entrypoint.sh"]
+CMD ["sleep", "infinity"]

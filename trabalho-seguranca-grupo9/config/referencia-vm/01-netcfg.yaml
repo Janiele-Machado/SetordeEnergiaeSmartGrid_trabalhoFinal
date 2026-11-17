@@ -1,0 +1,33 @@
+# =============================================================================
+# 01-netcfg.yaml - IP estático nas interfaces WAN e LAN (Ubuntu Server / netplan)
+# Copiar para: /etc/netplan/01-netcfg.yaml   (apague/renomeie o .yaml antigo)
+# Aplicar com: sudo chmod 600 /etc/netplan/01-netcfg.yaml && sudo netplan try
+# Confira os nomes das interfaces com: ip -br a
+# =============================================================================
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+
+    # ---- WAN (lado externo) ------------------------------------------------
+    # AJUSTE o IP/gateway para a faixa da rede onde sua VM está (modo Bridge).
+    enp0s3:
+      dhcp4: false
+      addresses:
+        - 192.168.0.50/24
+      routes:
+        - to: default             # rota padrão: todo tráfego desconhecido sai pela WAN
+          via: 192.168.0.1        # IP do seu roteador
+      nameservers:
+        addresses: [1.1.1.1, 8.8.8.8]
+
+    # ---- LAN (lado interno) ------------------------------------------------
+    enp0s8:
+      dhcp4: false
+      addresses:
+        - 192.168.10.1/24
+      routes:
+        # Rota estática: rede de campo (subestações/SCADA) alcançada por um
+        # roteador interno 192.168.10.2 (pode ser fictício no laboratório).
+        - to: 10.20.0.0/24
+          via: 192.168.10.2
