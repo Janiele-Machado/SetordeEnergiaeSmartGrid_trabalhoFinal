@@ -184,9 +184,7 @@ docker compose exec cliente ssh -o StrictHostKeyChecking=accept-new root@192.168
 
 **⚠️ Resultado:** o login como `root` com senha **é aceito**. Qualquer invasor que descubra ou adivinhe a senha obtém controle total da máquina.
 
-![T05 – root entra com senha](../evidencias/05_antes_root_entra.png)
-
-> 📸 **Sugestão de print:** terminal com o prompt `root@servidor-energia` logo após digitar a senha, comprovando o acesso.
+<img width="947" height="413" alt="image" src="https://github.com/user-attachments/assets/0d9ac887-76c2-41af-b1aa-371a4d8a1ed4" />
 
 ---
 
@@ -212,13 +210,11 @@ docker compose exec servidor bash /opt/projeto/scripts/hardening.sh admin_grid
 
 **✅ Resultado:** as sete etapas são concluídas e o script informa que o SSH passou a escutar na porta **2222**.
 
-![T06a – início do hardening](../evidencias/06a_hardening_inicio.png)
+<img width="950" height="467" alt="image" src="https://github.com/user-attachments/assets/d139141d-a5dc-46fe-a5cd-a1647794da99" />
 
-> 📸 **Sugestão de print:** início da execução do `hardening.sh` (etapas 1/7 a 3/7).
 
-![T06b – fim do hardening](../evidencias/06b_hardening_fim.png)
+<img width="629" height="441" alt="image" src="https://github.com/user-attachments/assets/099326c5-3154-4e5e-ad65-faafaef31b7f" />
 
-> 📸 **Sugestão de print:** final da execução, com a mensagem "Hardening concluído!" e a porta 2222.
 
 ---
 
@@ -246,13 +242,10 @@ docker compose exec servidor sysctl net.ipv4.ip_forward net.ipv4.conf.all.rp_fil
 
 `/etc/shadow` fica com `-rw-r-----` (só root e grupo `shadow`) e o `sshd_config` com `-rw-------` (só root). O `rp_filter = 1` ativa a proteção contra IP falsificado.
 
-![T07a – parâmetros do SSH](../evidencias/07a_sshd_parametros.png)
+<img width="954" height="260" alt="image" src="https://github.com/user-attachments/assets/1e53a254-8fc3-4154-96dc-f90e32d2d7c6" />
 
-> 📸 **Sugestão de print:** saída do `sshd -T` filtrado, com os seis parâmetros visíveis.
+<img width="935" height="77" alt="image" src="https://github.com/user-attachments/assets/46083275-5398-48af-ae69-ade5684e1a05" />
 
-![T07b – permissões e sysctl](../evidencias/07b_permissoes_sysctl.png)
-
-> 📸 **Sugestão de print:** `ls -l` dos arquivos críticos junto com a saída do `sysctl`.
 
 ---
 
@@ -285,25 +278,11 @@ docker compose exec servidor tail -20 /var/log/sshd.log
 | 4 | Login com chave pública | ✅ Entra **sem pedir senha**, exibindo o aviso legal "SISTEMA RESTRITO" |
 | 5 | Log do SSH | 📝 Registra a recusa do `root` (usuário fora do `AllowUsers`) |
 
-![T08a – root negado](../evidencias/08a_ssh_root_negado.png)
+<img width="941" height="296" alt="image" src="https://github.com/user-attachments/assets/4a964d1d-c7eb-4685-a351-4f7a078d98e4" />
 
-> 📸 **Sugestão de print:** tentativa de `root` terminando em `Permission denied (publickey)`.
+<img width="949" height="443" alt="image" src="https://github.com/user-attachments/assets/55d98fe4-c5d3-4edd-9ea3-fbb77db455de" />
 
-![T08b – senha negada](../evidencias/08b_ssh_senha_negada.png)
-
-> 📸 **Sugestão de print:** tentativa com `PubkeyAuthentication=no` sendo negada.
-
-![T08c – porta 22 fechada](../evidencias/08c_ssh_porta22.png)
-
-> 📸 **Sugestão de print:** tentativa na porta 22 com erro de conexão/timeout.
-
-![T08d – acesso por chave e banner](../evidencias/08d_ssh_chave_ok_banner.png)
-
-> 📸 **Sugestão de print:** login do `admin_grid` na 2222, sem senha, com o banner de aviso aparecendo.
-
-![T08e – log do SSH](../evidencias/08e_log_sshd.png)
-
-> 📸 **Sugestão de print:** `tail` do `/var/log/sshd.log` mostrando a recusa do usuário `root`.
+<img width="935" height="326" alt="image" src="https://github.com/user-attachments/assets/409c71a4-2ad7-4347-ac82-c3184dba568a" />
 
 ---
 
@@ -322,9 +301,12 @@ docker compose exec atacante nc -zv -w 3 172.31.200.10 502
 
 **⚠️ Resultado:** o Nmap identifica **sete portas abertas**: 2222 (SSH), 443, 8883 e, mais grave, os protocolos industriais 502 (Modbus), 20000 (DNP3), 2404 (IEC-104) e 4840 (OPC UA). O teste direto na 502 conecta com sucesso. Um invasor externo poderia, em tese, enviar comandos ao sistema de controle.
 
-![T09 – Nmap antes](../evidencias/09_nmap_antes.png)
+<img width="896" height="428" alt="image" src="https://github.com/user-attachments/assets/c37cc7a0-7b81-416b-9027-f86ac8115a1c" />
+<img width="677" height="365" alt="image" src="https://github.com/user-attachments/assets/e62ae0be-cbb0-4a22-9560-f5bc0f9d241a" />
 
-> 📸 **Sugestão de print:** resultado do Nmap com todas as portas `open`, mais o `nc` conectando na 502. Anexe também `nmap_antes.txt`.
+
+
+<img width="881" height="48" alt="image" src="https://github.com/user-attachments/assets/6ebec54f-c2e0-4c9d-8042-95e74648926c" />
 
 ---
 
@@ -354,17 +336,17 @@ docker compose exec servidor iptables -t nat -L POSTROUTING -n -v
 
 **✅ Resultado:** o script detecta as interfaces WAN e LAN, `INPUT` e `FORWARD` exibem `policy DROP`, e a tabela NAT contém a regra `MASQUERADE` para a saída da rede interna.
 
-![T10a – firewall aplicado](../evidencias/10a_firewall_aplicado.png)
+<img width="942" height="422" alt="image" src="https://github.com/user-attachments/assets/efe9f89f-1a89-4d80-9a5b-94a3fa6ae6f0" />
 
-> 📸 **Sugestão de print:** execução do `firewall.sh` com a linha "Interfaces detectadas" e a mensagem de sucesso.
 
-![T10b – regras de INPUT](../evidencias/10b_iptables_input.png)
+<img width="945" height="412" alt="image" src="https://github.com/user-attachments/assets/93325b08-537b-4260-8170-697b0af86d9d" />
 
-> 📸 **Sugestão de print:** `iptables -L INPUT` com `policy DROP` e a lista de regras numeradas.
 
-![T10c – FORWARD e NAT](../evidencias/10c_iptables_forward_nat.png)
+<img width="781" height="146" alt="image" src="https://github.com/user-attachments/assets/c0939f59-7d87-4dcd-b546-ea448ebb3f14" />
 
-> 📸 **Sugestão de print:** `FORWARD` (policy DROP) e a regra `MASQUERADE` da tabela NAT.
+
+ <img width="784" height="54" alt="image" src="https://github.com/user-attachments/assets/1e2ae2e6-9ddc-4d71-a6af-751b2600e079" />
+
 
 ---
 
