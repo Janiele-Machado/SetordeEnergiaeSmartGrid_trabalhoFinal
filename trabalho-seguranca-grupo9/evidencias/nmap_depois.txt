@@ -1,0 +1,9 @@
+# Nmap 7.94SVN scan initiated Tue Nov 17 22:13:30 2026 as: nmap -sS -sV -p- -T4 -oN /evidencias/nmap_depois.txt 172.31.200.10
+Nmap scan report for 172.31.200.10
+Host is up (0.000047s latency).
+All 65535 scanned ports on 172.31.200.10 are in ignored states.
+Not shown: 65535 filtered tcp ports (no-response)
+MAC Address: FE:82:0A:B3:27:9F (Unknown)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Tue Nov 17 22:35:31 2026 -- 1 IP address (1 host up) scanned in 1320.36 seconds
