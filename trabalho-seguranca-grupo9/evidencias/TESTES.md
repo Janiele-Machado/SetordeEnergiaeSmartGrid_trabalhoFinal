@@ -373,13 +373,8 @@ docker compose exec atacante bash -c "date; nmap -sS -sV -p- -T4 172.31.200.10 -
 
 Na varredura completa o servidor passa a **ignorar o atacante**: ele detecta o padrão de port scan e bloqueia o IP, de modo que nenhuma porta responde. O serviço legítimo segue acessível; a infraestrutura de controle desaparece do mapa do invasor.
 
-![T11a – portas liberadas](../evidencias/11a_nmap_portas_liberadas.png)
+<img width="949" height="308" alt="image" src="https://github.com/user-attachments/assets/42f5c8c9-f9a1-4821-adf7-afa7395783b8" />
 
-> 📸 **Sugestão de print:** Nmap em `443,8883` mostrando as duas `open`.
-
-![T11b – Nmap depois](../evidencias/11b_nmap_depois_completo.png)
-
-> 📸 **Sugestão de print:** varredura completa com as portas `filtered`. Se possível, monte uma imagem lado a lado com o print do T09.
 
 ---
 
@@ -397,17 +392,8 @@ docker compose exec servidor cat /proc/net/xt_recent/PORTSCAN
 
 **✅ Resultado:** os pacotes de scan não recebem resposta. O chain `SCAN_BLOCK` apresenta contadores de pacotes **maiores que zero** e a lista de banidos passa a conter o IP do atacante (`172.31.200.60`).
 
-![T12a – scans furtivos](../evidencias/12a_nmap_scans_furtivos.png)
+<img width="959" height="113" alt="image" src="https://github.com/user-attachments/assets/aa636700-bcbe-4bd3-a436-825f792d8618" />
 
-> 📸 **Sugestão de print:** execução do `nmap -sN -sF -sX` sem portas respondendo.
-
-![T12b – contadores](../evidencias/12b_contadores_scan_block.png)
-
-> 📸 **Sugestão de print:** `iptables -L SCAN_BLOCK -n -v` com a coluna `pkts` preenchida.
-
-![T12c – IP banido](../evidencias/12c_lista_banidos.png)
-
-> 📸 **Sugestão de print:** conteúdo de `/proc/net/xt_recent/PORTSCAN` com o IP `172.31.200.60`.
 
 ---
 
@@ -424,13 +410,8 @@ docker compose exec servidor iptables -L LOG_DROP -n -v
 
 **✅ Resultado:** as tentativas 1 a 3 chegam ao SSH e são negadas; da 4ª em diante a conexão **expira**, pois o firewall passa a descartar os pacotes. O contador de `LOG_DROP` registra os descartes. Um ataque automatizado de adivinhação de senhas se torna inviável.
 
-![T13a – tentativas](../evidencias/13a_bruteforce_ssh.png)
+<img width="947" height="161" alt="image" src="https://github.com/user-attachments/assets/d0c82dc4-5db5-4e62-ad4d-234f74d7e3f2" />
 
-> 📸 **Sugestão de print:** as seis tentativas, mostrando a mudança de "Permission denied" para timeout a partir da 4ª.
-
-![T13b – contador](../evidencias/13b_contador_log_drop.png)
-
-> 📸 **Sugestão de print:** `iptables -L LOG_DROP -n -v` com contador maior que zero.
 
 ---
 
