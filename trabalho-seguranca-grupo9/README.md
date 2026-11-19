@@ -97,7 +97,7 @@ flowchart LR
 
 ```bash
 # 1) Clonar e subir o laboratório
-git clone https://github.com/SEU_USUARIO/trabalho-seguranca-grupo9.git
+git clone https://github.com/Janiele-Machado/SetordeEnergiaeSmartGrid_trabalhoFinal
 cd trabalho-seguranca-grupo9
 docker compose up -d --build
 
@@ -157,7 +157,6 @@ O servidor também executa o `--check` **automaticamente a cada 60 segundos** (v
 
 ```
 trabalho-seguranca-grupo9/
-├── README.md
 ├── docker-compose.yml             # topologia: redes, IPs e volumes
 ├── docker/
 │   ├── Dockerfile.servidor
@@ -174,10 +173,9 @@ trabalho-seguranca-grupo9/
 │   ├── sshd_config                # SSH endurecido (template)
 │   └── referencia-vm/01-netcfg.yaml   # netplan, caso seja exigida VM
 ├── gpg/                           # chaves públicas exportadas (.asc)
-├── evidencias/                    # prints e saídas dos testes
+├── evidencias/
+│   ├── TESTES.md                  # passo a passo completo de execução com plano de testes contendo prints e saídas dos testes
 └── docs/
-    ├── TUTORIAL.md                # passo a passo completo de execução
-    ├── TESTES.md                  # plano de testes (roteiro)
     └── RELATORIO_DE_TESTES.md     # relatório com evidências
 ```
 
@@ -187,8 +185,7 @@ trabalho-seguranca-grupo9/
 
 | Documento | Conteúdo |
 |:--|:--|
-| [📖 `docs/TUTORIAL.md`](docs/TUTORIAL.md) | Passo a passo detalhado de execução, problemas comuns e diferenças entre VM e Docker |
-| [🧪 `docs/TESTES.md`](docs/TESTES.md) | Plano com os 20 testes, comandos, resultados esperados e prints a coletar |
+| [📖 `evidencias/TESTES.md`](evidencias/TESTES.md) | Passo a passo detalhado de execução, problemas comuns e diferenças entre VM e Docker, E com os 20 testes, comandos, resultados esperados e prints |
 | [🧾 `docs/RELATORIO_DE_TESTES.md`](docs/RELATORIO_DE_TESTES.md) | Relatório de apresentação: cada teste explicado, com a evidência e a matriz de rastreabilidade |
 
 ---
