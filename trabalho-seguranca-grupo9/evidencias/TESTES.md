@@ -431,13 +431,10 @@ docker compose exec servidor iptables -L INPUT -n -v
 
 **✅ Resultado:** os contadores mostram **milhares de pacotes descartados** pela regra de limite (`hashlimit`), que aceita no máximo 25 SYN/s por origem (rajada de 50). O tráfego excedente do atacante é eliminado na entrada.
 
-![T14a – flood](../evidencias/14a_hping3_flood.png)
+<img width="955" height="218" alt="image" src="https://github.com/user-attachments/assets/76b8dff5-133e-4aa1-8312-98dcab690439" />
 
-> 📸 **Sugestão de print:** execução do `hping3 --flood` (pode ser cortada após 5 s).
+<img width="940" height="392" alt="image" src="https://github.com/user-attachments/assets/7f50824f-804a-4a36-be38-68a783ca4763" />
 
-![T14b – contadores](../evidencias/14b_contadores_synflood.png)
-
-> 📸 **Sugestão de print:** contadores de `LOG_DROP` e da regra `hashlimit` com números altos.
 
 ---
 
@@ -465,9 +462,8 @@ docker compose exec atacante nc -zv -w 3 172.31.200.10 443      # WAN -> HTTPS
 | 🏠 Rede interna (cliente) | DNP3 20000 | ✅ conecta |
 | 🌐 Internet (atacante) | HTTPS 443 | ✅ conecta (serviço público) |
 
-![T15 – segmentação](../evidencias/15_segmentacao_ot.png)
+<img width="954" height="232" alt="image" src="https://github.com/user-attachments/assets/cc7cafdc-53f8-408f-9a3d-e76e6125afde" />
 
-> 📸 **Sugestão de print:** os cinco comandos no mesmo terminal, com bloqueado na WAN e `succeeded` na LAN.
 
 ---
 
@@ -485,9 +481,8 @@ docker compose exec cliente ping -c 2 8.8.8.8          # ICMP: permitido
 
 **✅ Resultado:** HTTPS e ping funcionam; a conexão na porta 22 expira, pois não faz parte da lista de saídas permitidas.
 
-![T16 – filtragem de saída](../evidencias/16_forward_saida.png)
+<img width="948" height="217" alt="image" src="https://github.com/user-attachments/assets/e94ba23b-d8f3-4ce1-b9fd-eee5ab18cbe5" />
 
-> 📸 **Sugestão de print:** os três comandos, mostrando `succeeded`, *timed out* e o ping respondendo.
 
 ---
 
@@ -497,14 +492,16 @@ docker compose exec cliente ping -c 2 8.8.8.8          # ICMP: permitido
 
 ```bash
 docker compose restart servidor
-docker compose exec servidor iptables -L INPUT -n | head -5
+# aguardar ~10 segundos: o firewall é reaplicado durante a subida do container
+docker compose exec servidor ip -br a
+docker compose exec servidor cat /var/log/firewall_boot.log
+docker compose exec servidor bash -c "iptables -L INPUT -n | head -5"
 ```
 
-**✅ Resultado:** após o reinício, o servidor restaura automaticamente as regras salvas e o `INPUT` continua com `policy DROP`. Não existe janela em que o servidor fique desprotegido.
+**✅ Resultado:** após o reinício, o servidor **reaplica automaticamente o `firewall.sh`** antes de subir o SSH e os serviços, e o `INPUT` continua com `policy DROP`. A reaplicação detecta as interfaces pela rede (WAN e LAN) e não pelo nome, então o firewall continua correto mesmo que o Docker troque `eth0` e `eth1` entre reinícios.
 
-![T17 – persistência](../evidencias/17_persistencia_firewall.png)
-
-> 📸 **Sugestão de print:** o `restart` seguido do `iptables -L INPUT` ainda com `policy DROP`.
+<img width="959" height="473" alt="image" src="https://github.com/user-attachments/assets/b3ce6284-cb02-408d-8c33-e75752b0329f" />
+<img width="959" height="458" alt="image" src="https://github.com/user-attachments/assets/5abee38b-fc02-44b9-b955-44f1352df29c" />
 
 ---
 
@@ -521,17 +518,111 @@ docker compose exec servidor iptables -L INPUT -n | head -5
 3. O arquivo é **cifrado para os três** e **assinado** pelo remetente: só quem tem a chave privada correspondente lê, e quem lê tem certeza de quem enviou.
 4. O arquivo em texto puro é destruído com `shred`.
 
+**Distribuição dos administradores no laboratório:**
+
+| Administrador | Onde fica a chave | Container |
+|:--|:--|:--|
+| Admin Um (`admin1@grupo9.lab`) | chaveiro padrão do root | `cliente` |
+| Admin Dois (`admin2@grupo9.lab`) | chaveiro do usuário `admin_grid` | `servidor` |
+| Admin Três (`admin3@grupo9.lab`) | chaveiro separado (`/root/gpg_admin3`) | `cliente` |
+
+> Os comandos GPG rodam **dentro dos containers**, que já têm o `gpg` instalado. Em cada terminal novo execute `export GPG_TTY=$(tty)`.
+> O GPG pede uma senha (passphrase) para proteger cada chave. Use senhas só com letras e números (ex.: `Grupo9Energia1`) e digite a mesma duas vezes, apertando Enter.
+
+**1) Geração das chaves**
+
+```powershell
+docker compose exec cliente bash
+```
 ```bash
+# Admin Um (cliente)
+export GPG_TTY=$(tty)
+gpg --quick-generate-key "Admin Um <admin1@grupo9.lab>" default default 2y
+gpg --armor --export admin1@grupo9.lab > /gpg/admin1_publica.asc
+
+# Admin Três (cliente, chaveiro separado)
+mkdir -m 700 /root/gpg_admin3
+GNUPGHOME=/root/gpg_admin3 gpg --quick-generate-key "Admin Tres <admin3@grupo9.lab>" default default 2y
+GNUPGHOME=/root/gpg_admin3 gpg --armor --export admin3@grupo9.lab > /gpg/admin3_publica.asc
+exit
+```
+```powershell
+docker compose exec -u admin_grid servidor bash
+```
+```bash
+# Admin Dois (servidor, entrando direto como admin_grid)
+export GPG_TTY=$(tty)
+gpg --quick-generate-key "Admin Dois <admin2@grupo9.lab>" default default 2y
+gpg --armor --export admin2@grupo9.lab > ~/admin2_publica.asc
+ls -l ~/admin2_publica.asc
+exit
+```
+
+**2) Troca e assinatura das chaves públicas** (pelo SSH endurecido, porta 2222)
+
+```powershell
+docker compose exec cliente bash
+```
+```bash
+export GPG_TTY=$(tty)
+scp -P 2222 admin_grid@192.168.10.1:admin2_publica.asc /gpg/
+gpg --import /gpg/admin2_publica.asc /gpg/admin3_publica.asc
 gpg --list-keys
 gpg --fingerprint admin2@grupo9.lab
 gpg --sign-key admin2@grupo9.lab
+gpg --sign-key admin3@grupo9.lab
 gpg --list-sigs
-gpg --encrypt --sign --armor -r admin1@grupo9.lab -r admin2@grupo9.lab -r admin3@grupo9.lab -o config_sensivel.env.asc config_sensivel.env
-scp -P 2222 config_sensivel.env.asc admin_grid@192.168.10.1:
-gpg --decrypt config_sensivel.env.asc
+scp -P 2222 /gpg/admin1_publica.asc /gpg/admin3_publica.asc admin_grid@192.168.10.1:
+exit
+```
+```powershell
+docker compose exec -u admin_grid servidor bash
+```
+```bash
+export GPG_TTY=$(tty)
+gpg --import admin1_publica.asc admin3_publica.asc
+gpg --sign-key admin1@grupo9.lab
+exit
 ```
 
-**✅ Resultado:** o conteúdo cifrado é totalmente ilegível; o destinatário decifra, vê as credenciais e recebe a confirmação **"Good signature"** do remetente. Quem **não** possui a chave privada recebe `decryption failed: No secret key`.
+**3) Cifrar para os três administradores, assinar e enviar**
+
+```powershell
+docker compose exec cliente bash
+```
+```bash
+export GPG_TTY=$(tty)
+cat > /root/config_sensivel.env <<'EOF'
+DB_USER=telemetria_app
+DB_PASS=Tr0c4-Est4-Senh4!
+API_TOKEN=tok_grid_9f8a7b6c5d4e3f2a1b
+EOF
+
+gpg --encrypt --sign --armor -r admin1@grupo9.lab -r admin2@grupo9.lab -r admin3@grupo9.lab -o /root/config_sensivel.env.asc /root/config_sensivel.env
+shred -u /root/config_sensivel.env
+cat /root/config_sensivel.env.asc
+scp -P 2222 /root/config_sensivel.env.asc admin_grid@192.168.10.1:
+exit
+```
+
+**4) Decifrar no destino (Admin Dois, no servidor)**
+
+```powershell
+docker compose exec -u admin_grid servidor bash
+```
+```bash
+export GPG_TTY=$(tty)
+gpg --decrypt config_sensivel.env.asc
+exit
+```
+
+**5) Prova de que quem não tem a chave não lê**
+
+```powershell
+docker compose exec servidor gpg --decrypt /home/admin_grid/config_sensivel.env.asc
+```
+
+**✅ Resultado:** o conteúdo cifrado é totalmente ilegível; o destinatário decifra, vê as credenciais e recebe a confirmação **"Good signature"** do remetente (Admin Um). Quem **não** possui a chave privada (o usuário `root` do servidor, neste teste) recebe `decryption failed: No secret key`.
 
 ![T18a – chaves geradas](../evidencias/18a_gpg_chaves_geradas.png)
 
@@ -557,6 +648,7 @@ gpg --decrypt config_sensivel.env.asc
 
 > 📸 **Sugestão de print:** tentativa de decifrar sem a chave privada, resultando em `No secret key`.
 
+---
 ---
 
 ## T19 · Linha de base de integridade
