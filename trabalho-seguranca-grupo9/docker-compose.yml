@@ -4,7 +4,10 @@
 #   [atacante] 172.31.200.60 --(wan)-- 172.31.200.10 [servidor] 192.168.10.1 --(lan)-- 192.168.10.10 [cliente]
 #
 # - wan : rede externa (com saída para a internet via host)
-# - lan : rede interna ISOLADA (internal: true) -> só chega nela passando pelo servidor
+# - lan : rede interna. A rota padrão do cliente aponta para o servidor, e o host NÃO faz NAT dela
+#         (enable_ip_masquerade=false): a LAN só chega à internet passando pelo servidor.
+#         Obs.: "internal: true" foi descartado, pois o Docker passa a descartar no host todo o
+#         tráfego que sai da sub-rede, inclusive o que atravessaria o servidor como gateway.
 # - O "servidor" é o Ubuntu com firewall/gateway; "cliente" é o admin; "atacante" roda Nmap/hping3.
 # =============================================================================
 name: seg-grupo9
@@ -91,7 +94,8 @@ networks:
           gateway: 172.31.200.1
   lan:
     driver: bridge
-    internal: true                   # sem saída direta: tudo passa pelo servidor
+    driver_opts:
+      com.docker.network.bridge.enable_ip_masquerade: "false"   # o host não faz NAT da LAN
     ipam:
       config:
         - subnet: 192.168.10.0/24

@@ -214,8 +214,8 @@ ip6tables -P OUTPUT  ACCEPT || true
 # -----------------------------------------------------------------------------
 save_rules() {
     mkdir -p /etc/iptables
-    iptables-save  > /etc/iptables/rules.v4
-    ip6tables-save > /etc/iptables/rules.v6 || true
+    iptables-save  | sed '/^#/d' > /etc/iptables/rules.v4   # sem comentários com data: hash estável
+    ip6tables-save | sed '/^#/d' > /etc/iptables/rules.v6 || true
     chmod 600 /etc/iptables/rules.v4 /etc/iptables/rules.v6
     msg "Regras salvas em /etc/iptables/rules.v4"
 }
