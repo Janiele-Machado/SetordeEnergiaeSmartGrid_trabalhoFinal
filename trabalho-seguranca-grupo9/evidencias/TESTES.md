@@ -431,13 +431,10 @@ docker compose exec servidor iptables -L INPUT -n -v
 
 **✅ Resultado:** os contadores mostram **milhares de pacotes descartados** pela regra de limite (`hashlimit`), que aceita no máximo 25 SYN/s por origem (rajada de 50). O tráfego excedente do atacante é eliminado na entrada.
 
-![T14a – flood](../evidencias/14a_hping3_flood.png)
+<img width="955" height="218" alt="image" src="https://github.com/user-attachments/assets/76b8dff5-133e-4aa1-8312-98dcab690439" />
 
-> 📸 **Sugestão de print:** execução do `hping3 --flood` (pode ser cortada após 5 s).
+<img width="940" height="392" alt="image" src="https://github.com/user-attachments/assets/7f50824f-804a-4a36-be38-68a783ca4763" />
 
-![T14b – contadores](../evidencias/14b_contadores_synflood.png)
-
-> 📸 **Sugestão de print:** contadores de `LOG_DROP` e da regra `hashlimit` com números altos.
 
 ---
 
@@ -465,9 +462,8 @@ docker compose exec atacante nc -zv -w 3 172.31.200.10 443      # WAN -> HTTPS
 | 🏠 Rede interna (cliente) | DNP3 20000 | ✅ conecta |
 | 🌐 Internet (atacante) | HTTPS 443 | ✅ conecta (serviço público) |
 
-![T15 – segmentação](../evidencias/15_segmentacao_ot.png)
+<img width="954" height="232" alt="image" src="https://github.com/user-attachments/assets/cc7cafdc-53f8-408f-9a3d-e76e6125afde" />
 
-> 📸 **Sugestão de print:** os cinco comandos no mesmo terminal, com bloqueado na WAN e `succeeded` na LAN.
 
 ---
 
