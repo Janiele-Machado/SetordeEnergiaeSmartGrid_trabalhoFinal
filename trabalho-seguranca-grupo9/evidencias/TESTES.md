@@ -695,21 +695,9 @@ docker compose exec servidor bash /opt/projeto/scripts/integrity_check.sh --chec
 
 O verificador acusa **"Regras ATIVAS do iptables foram modificadas!"**: uma brecha aberta às escondidas no firewall não passa despercebida.
 
-![T20a – alerta](../evidencias/20a_alerta_passwd_shadow.png)
+<img width="941" height="455" alt="image" src="https://github.com/user-attachments/assets/b6a4fff4-c1e6-4391-bbc5-f785b5983d62" />
 
-> 📸 **Sugestão de print:** o `--check` com o alerta vermelho para `/etc/passwd` e `/etc/shadow`.
-
-![T20b – log](../evidencias/20b_log_alerta.png)
-
-> 📸 **Sugestão de print:** `tail` do `integrity_check.log` com as linhas `[ALERTA]` e data/hora.
-
-![T20c – detecção automática](../evidencias/20c_alerta_automatico.png)
-
-> 📸 **Sugestão de print:** o log com um novo `[ALERTA]` surgido sozinho, sem o `--check` manual.
-
-![T20d – regras alteradas](../evidencias/20d_alerta_regras_iptables.png)
-
-> 📸 **Sugestão de print:** alerta "Regras ATIVAS do iptables foram modificadas!".
+<img width="947" height="131" alt="image" src="https://github.com/user-attachments/assets/637306b6-4108-4cdb-bb53-163f8c34edf5" />
 
 ---
 
