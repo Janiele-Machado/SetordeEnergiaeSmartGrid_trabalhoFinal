@@ -663,13 +663,8 @@ docker compose exec servidor bash /opt/projeto/scripts/integrity_check.sh --chec
 
 **✅ Resultado:** o `--init` grava a linha de base com os hashes; o `--check` confirma `[OK]` em verde para todos os itens monitorados.
 
-![T19a – linha de base](../evidencias/19a_integridade_init.png)
+<img width="956" height="177" alt="image" src="https://github.com/user-attachments/assets/e2000281-7caf-4811-91d8-7e7cf7aebe60" />
 
-> 📸 **Sugestão de print:** saída do `--init` com os hashes SHA-256 listados.
-
-![T19b – verificação OK](../evidencias/19b_integridade_ok.png)
-
-> 📸 **Sugestão de print:** saída do `--check` com todos os itens `[OK]` em verde.
 
 ---
 
@@ -755,7 +750,7 @@ Os testes confirmam que a arquitetura proposta atende aos objetivos do cenário:
 
 **Grupo 9 · Setor de Energia e Smart Grid**
 
-Integrantes: _______________________ · _______________________ · _______________________
+Integrantes: Janiele · Arthur · Emanuel
 
 Disciplina de Segurança da Informação · Bacharelado em Sistemas de Informação · 2026
 
