@@ -626,32 +626,26 @@ docker compose exec servidor gpg --decrypt /home/admin_grid/config_sensivel.env.
 
 ![alt text](image.png)
 
-![T18b – assinaturas](../evidencias/18b_gpg_fingerprint_assinatura.png)
 
-> 📸 **Sugestão de print:** `gpg --fingerprint` e `gpg --list-sigs` com as assinaturas cruzadas.
+ `gpg --fingerprint` e `gpg --list-sigs` com as assinaturas cruzadas.
+ ![alt text](image-1.png)
 
-![T18c – arquivo cifrado](../evidencias/18c_gpg_arquivo_cifrado.png)
 
-> 📸 **Sugestão de print:** `cat config_sensivel.env.asc` com o bloco `BEGIN PGP MESSAGE` ilegível.
+![alt text](image-2.png)
 
-![T18d – transferência](../evidencias/18d_gpg_transferencia_scp.png)
+o `scp -P 2222` enviando o arquivo cifrado ao servidor.
 
-> 📸 **Sugestão de print:** o `scp -P 2222` enviando o arquivo cifrado ao servidor.
 
-![T18e – decifragem](../evidencias/18e_gpg_decifragem_ok.png)
+![alt text](image-3.png)
 
-> 📸 **Sugestão de print:** `gpg --decrypt` exibindo as credenciais e "Good signature".
-
-![T18f – sem a chave](../evidencias/18f_gpg_sem_chave_falha.png)
-
-> 📸 **Sugestão de print:** tentativa de decifrar sem a chave privada, resultando em `No secret key`.
-
+![alt text](image-4.png)
 ---
 ---
 
 ## T19 · Linha de base de integridade
 
 **🎯 Objetivo:** registrar o "estado bom" dos arquivos mais sensíveis do sistema e validar que nada foi alterado.
+
 
 **Arquivos monitorados com SHA-256:**
 
