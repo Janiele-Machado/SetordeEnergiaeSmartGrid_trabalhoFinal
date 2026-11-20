@@ -227,11 +227,11 @@ Mais orientações estão no [plano de testes](trabalho-seguranca-grupo9/evidenc
 
 ## 👥 Equipe
 
-| Integrante | Responsabilidade |
+| Integrante | 
 |:--|:--|
-| _Nome do integrante 1_ | _a preencher_ |
-| _Nome do integrante 2_ | _a preencher_ |
-| _Nome do integrante 3_ | _a preencher_ |
+| Janiele de Farias Machado| 
+| Arthur Henrique Dias do Couto | 
+| Emanuel | 
 
 **Disciplina:** Segurança da Informação · **Curso:** Bacharelado em Sistemas de Informação · **Período:** 6º · **Ano:** 2026
 
