@@ -73,15 +73,15 @@ flowchart LR
 
 | Módulo | Requisito | Implementação | Arquivo |
 |:--|:--|:--|:--|
-| **2 · Rede** | IP estático e rota estática | `ipv4_address` no Compose e rota `10.20.0.0/24 via 192.168.10.2` | `docker-compose.yml`, `docker/servidor-entrypoint.sh` |
-| **2 · Firewall** | Política `DROP` em INPUT e FORWARD | Negar por padrão; só passa o liberado | `scripts/firewall.sh` |
-| | Portas estritamente necessárias | 443 e 8883 públicas; SSH, DNS e protocolos industriais só na LAN | `scripts/firewall.sh` |
-| | Proteção contra port scan | Bloqueio de flags Null/Xmas/FIN e banimento de 5 min (`recent`) | `scripts/firewall.sh` |
-| | Rate-limit contra força bruta e DoS | SSH: 3 conexões/min por IP · SYN: 25/s por IP · `connlimit` nos serviços públicos | `scripts/firewall.sh` |
-| **2 · Hardening** | SSH seguro | Porta 2222, sem root, `AllowUsers`, somente chave, cifras modernas | `config/sshd_config` |
-| | Sistema operacional | Permissões em `/etc` e `/var/log`, remoção de pacotes, atualização, `sysctl` de rede | `scripts/hardening.sh` |
-| **3 · Criptografia** | Gestão de chaves GPG | 3 administradores, chaves `ed25519`, assinatura mútua, troca cifrada | [`docs/RELATORIO_DE_TESTES.md`](docs/RELATORIO_DE_TESTES.md) (T18) |
-| **3 · Integridade** | Hashes SHA-256 com alerta | Monitora `/etc/passwd`, `/etc/shadow`, `rules.v4` e as regras ativas | `scripts/integrity_check.sh` |
+| **2 · Rede** | IP estático e rota estática | `ipv4_address` no Compose e rota `10.20.0.0/24 via 192.168.10.2` | [`docker-compose.yml`](trabalho-seguranca-grupo9/docker-compose.yml), [`servidor-entrypoint.sh`](trabalho-seguranca-grupo9/docker/servidor-entrypoint.sh) |
+| **2 · Firewall** | Política `DROP` em INPUT e FORWARD | Negar por padrão; só passa o liberado | [`firewall.sh`](trabalho-seguranca-grupo9/scripts/firewall.sh) |
+| | Portas estritamente necessárias | 443 e 8883 públicas; SSH, DNS e protocolos industriais só na LAN | [`firewall.sh`](trabalho-seguranca-grupo9/scripts/firewall.sh) |
+| | Proteção contra port scan | Bloqueio de flags Null/Xmas/FIN e banimento de 5 min (`recent`) | [`firewall.sh`](trabalho-seguranca-grupo9/scripts/firewall.sh) |
+| | Rate-limit contra força bruta e DoS | SSH: 3 conexões/min por IP · SYN: 25/s por IP · `connlimit` nos serviços públicos | [`firewall.sh`](trabalho-seguranca-grupo9/scripts/firewall.sh) |
+| **2 · Hardening** | SSH seguro | Porta 2222, sem root, `AllowUsers`, somente chave, cifras modernas | [`sshd_config`](trabalho-seguranca-grupo9/config/sshd_config) |
+| | Sistema operacional | Permissões em `/etc` e `/var/log`, remoção de pacotes, atualização, `sysctl` de rede | [`hardening.sh`](trabalho-seguranca-grupo9/scripts/hardening.sh) |
+| **3 · Criptografia** | Gestão de chaves GPG | 3 administradores, chaves `ed25519`, assinatura mútua, troca cifrada | [`Testes · T18`](trabalho-seguranca-grupo9/evidencias/TESTES.md#t18--gpg-troca-criptografada-de-credenciais) |
+| **3 · Integridade** | Hashes SHA-256 com alerta | Monitora `/etc/passwd`, `/etc/shadow`, `rules.v4` e as regras ativas | [`integrity_check.sh`](trabalho-seguranca-grupo9/scripts/integrity_check.sh) |
 
 ---
 
@@ -118,7 +118,7 @@ docker compose exec servidor bash /opt/projeto/scripts/integrity_check.sh --init
 docker compose exec servidor bash /opt/projeto/scripts/integrity_check.sh --check
 ```
 
-> **Para registrar as evidências do "antes e depois"** (Nmap, SSH como root etc.), não aplique tudo de uma vez: siga a ordem do [plano de testes](docs/TESTES.md). Alguns testes precisam ser feitos **antes** do hardening e do firewall.
+> **Para registrar as evidências do "antes e depois"** (Nmap, SSH como root etc.), não aplique tudo de uma vez: siga a ordem do [plano de testes](trabalho-seguranca-grupo9/evidencias/TESTES.md). Alguns testes precisam ser feitos **antes** do hardening e do firewall.
 
 ### Acessar os containers
 
@@ -144,10 +144,10 @@ docker compose down -v       # apaga TUDO e volta ao estado inicial vulnerável
 
 | Script | Função | Como usar |
 |:--|:--|:--|
-| [`scripts/verificar_modulos.sh`](scripts/verificar_modulos.sh) | Testa se o kernel do host oferece os módulos do netfilter usados | `bash verificar_modulos.sh` |
-| [`scripts/hardening.sh`](scripts/hardening.sh) | Endurece o SO e o SSH (detecta se está em container ou VM) | `bash hardening.sh <usuario_admin>` |
-| [`scripts/firewall.sh`](scripts/firewall.sh) | Aplica o firewall iptables; detecta as interfaces WAN/LAN pela rede | `bash firewall.sh [--safe]` |
-| [`scripts/integrity_check.sh`](scripts/integrity_check.sh) | Cria a linha de base e valida os hashes SHA-256 | `bash integrity_check.sh --init` ou `--check` |
+| [`verificar_modulos.sh`](trabalho-seguranca-grupo9/scripts/verificar_modulos.sh) | Testa se o kernel do host oferece os módulos do netfilter usados | `bash verificar_modulos.sh` |
+| [`hardening.sh`](trabalho-seguranca-grupo9/scripts/hardening.sh) | Endurece o SO e o SSH (detecta se está em container ou VM) | `bash hardening.sh <usuario_admin>` |
+| [`firewall.sh`](trabalho-seguranca-grupo9/scripts/firewall.sh) | Aplica o firewall iptables; detecta as interfaces WAN/LAN pela rede | `bash firewall.sh [--safe]` |
+| [`integrity_check.sh`](trabalho-seguranca-grupo9/scripts/integrity_check.sh) | Cria a linha de base e valida os hashes SHA-256 | `bash integrity_check.sh --init` ou `--check` |
 
 O servidor também executa o `--check` **automaticamente a cada 60 segundos** (variável `INTEGRITY_INTERVAL` no `docker-compose.yml`) depois que a linha de base existe.
 
@@ -156,6 +156,7 @@ O servidor também executa o `--check` **automaticamente a cada 60 segundos** (v
 ## 📂 Estrutura do repositório
 
 ```
+README.md                           # README geral do projeto
 trabalho-seguranca-grupo9/
 ├── docker-compose.yml             # topologia: redes, IPs e volumes
 ├── docker/
@@ -185,8 +186,7 @@ trabalho-seguranca-grupo9/
 
 | Documento | Conteúdo |
 |:--|:--|
-| [📖 `evidencias/TESTES.md`](evidencias/TESTES.md) | Passo a passo detalhado de execução, problemas comuns e diferenças entre VM e Docker, E com os 20 testes, comandos, resultados esperados e prints |
-| [🧾 `docs/RELATORIO_DE_TESTES.md`](docs/RELATORIO_DE_TESTES.md) | Relatório de apresentação: cada teste explicado, com a evidência e a matriz de rastreabilidade |
+| [📖 `evidencias/TESTES.md`](trabalho-seguranca-grupo9/evidencias/TESTES.md) | Passo a passo detalhado de execução, problemas comuns e diferenças entre VM e Docker, com os 20 testes, comandos, resultados esperados e evidências |
 
 ---
 
@@ -203,7 +203,7 @@ trabalho-seguranca-grupo9/
 
 ## ⚖️ Decisões de projeto e limitações
 
-- **Docker em vez de VM:** o kernel é compartilhado com o host. Por isso `auditd` e os parâmetros `kernel.*` não se aplicam; a auditoria é feita pelo verificador SHA-256 e pelo log do SSH (`/var/log/sshd.log`). Há uma tabela comparativa no [tutorial](docs/TUTORIAL.md).
+- **Docker em vez de VM:** o kernel é compartilhado com o host. Por isso `auditd` e os parâmetros `kernel.*` não se aplicam; a auditoria é feita pelo verificador SHA-256 e pelo log do SSH (`/var/log/sshd.log`). As diferenças entre Docker e VM estão no [plano de testes](trabalho-seguranca-grupo9/evidencias/TESTES.md).
 - **Serviços industriais simulados:** as portas 502, 20000, 2404 e 4840 respondem só com um banner. O foco é a **proteção do perímetro**, não a implementação dos protocolos.
 - **Nomes de interface variáveis:** o Docker pode trocar `eth0` e `eth1` entre reinícios. Por isso o `firewall.sh` detecta WAN e LAN **pela rede** e é reexecutado a cada boot, em vez de restaurar um arquivo salvo.
 - **Logs do iptables:** o alvo `LOG` não escreve dentro de containers. A evidência dos bloqueios vem dos **contadores** (`iptables -L -n -v`) e da lista de IPs banidos (`/proc/net/xt_recent/PORTSCAN`).
@@ -221,7 +221,7 @@ trabalho-seguranca-grupo9/
 | `The system cannot find the file specified` ao rodar `docker compose` | O Docker Desktop não está aberto. Abra-o e espere o motor iniciar |
 | Cliente sem acesso à internet depois de reiniciar | Reaplique o firewall: `docker compose exec servidor bash /opt/projeto/scripts/firewall.sh` |
 
-Mais soluções no [tutorial](docs/TUTORIAL.md#6-problemas-comuns).
+Mais orientações estão no [plano de testes](trabalho-seguranca-grupo9/evidencias/TESTES.md).
 
 ---
 
