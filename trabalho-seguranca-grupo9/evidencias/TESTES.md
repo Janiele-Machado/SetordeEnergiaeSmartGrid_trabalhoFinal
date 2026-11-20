@@ -527,7 +527,7 @@ docker compose exec servidor bash -c "iptables -L INPUT -n | head -5"
 | Admin Três (`admin3@grupo9.lab`) | chaveiro separado (`/root/gpg_admin3`) | `cliente` |
 
 > Os comandos GPG rodam **dentro dos containers**, que já têm o `gpg` instalado. Em cada terminal novo execute `export GPG_TTY=$(tty)`.
-> O GPG pede uma senha (passphrase) para proteger cada chave. Use senhas só com letras e números (ex.: `Grupo9Energia1`) e digite a mesma duas vezes, apertando Enter.
+> O GPG pede uma senha (passphrase) para proteger cada chave. Use senhas só com letras e números (ex.: `Grupo9Energia`) e digite a mesma duas vezes, apertando Enter.
 
 **1) Geração das chaves**
 
@@ -624,9 +624,7 @@ docker compose exec servidor gpg --decrypt /home/admin_grid/config_sensivel.env.
 
 **✅ Resultado:** o conteúdo cifrado é totalmente ilegível; o destinatário decifra, vê as credenciais e recebe a confirmação **"Good signature"** do remetente (Admin Um). Quem **não** possui a chave privada (o usuário `root` do servidor, neste teste) recebe `decryption failed: No secret key`.
 
-![T18a – chaves geradas](../evidencias/18a_gpg_chaves_geradas.png)
-
-> 📸 **Sugestão de print:** `gpg --list-keys` com as chaves dos administradores.
+![alt text](image.png)
 
 ![T18b – assinaturas](../evidencias/18b_gpg_fingerprint_assinatura.png)
 
